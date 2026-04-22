@@ -187,13 +187,7 @@ body {
     height: 400px;
     object-fit: cover;
     border-radius: 50%;
-    filter: grayscale(100%);
-    transition: filter 0.4s ease;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-}
-
-.headshot:hover {
-    filter: grayscale(0%);
 }
 
 .hero-title {
