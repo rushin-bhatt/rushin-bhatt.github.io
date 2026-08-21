@@ -677,6 +677,16 @@ section {
     color: var(--white);
 }
 
+.experience-list a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.experience-list a:hover {
+    color: var(--white);
+}
+
 /* ==========================================
    PROJECTS SECTION
    ========================================== */
