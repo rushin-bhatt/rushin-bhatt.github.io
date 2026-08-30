@@ -301,6 +301,130 @@ function setupFormValidation() {
 document.addEventListener('DOMContentLoaded', setupFormValidation);
 
 // ==========================================
+// PIXELATED HEADSHOT EFFECT
+// ==========================================
+function setupPixelatedHeadshot() {
+    const effect = document.querySelector('[data-headshot-effect]');
+    if (!effect) return;
+
+    const image = effect.querySelector('.headshot');
+    const canvas = effect.querySelector('.headshot-pixels');
+    const context = canvas.getContext('2d', { alpha: false });
+    const sampleCanvas = document.createElement('canvas');
+    const sampleContext = sampleCanvas.getContext('2d', { willReadFrequently: true });
+    let resizeFrame;
+
+    if (!context || !sampleContext) return;
+
+    function renderPixelPortrait() {
+        const { width, height } = effect.getBoundingClientRect();
+        if (!width || !height || !image.naturalWidth) return;
+
+        const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+        const gridSize = Math.max(48, Math.min(88, Math.round(width / 5)));
+        const cellWidth = width / gridSize;
+        const cellHeight = height / gridSize;
+        const gap = Math.max(0.8, Math.min(2, cellWidth * 0.14));
+
+        canvas.width = Math.round(width * pixelRatio);
+        canvas.height = Math.round(height * pixelRatio);
+        context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+        context.fillStyle = '#080808';
+        context.fillRect(0, 0, width, height);
+
+        sampleCanvas.width = gridSize;
+        sampleCanvas.height = gridSize;
+        sampleContext.fillStyle = '#080808';
+        sampleContext.fillRect(0, 0, gridSize, gridSize);
+
+        const scale = Math.max(
+            gridSize / image.naturalWidth,
+            gridSize / image.naturalHeight
+        );
+        const drawnWidth = image.naturalWidth * scale;
+        const drawnHeight = image.naturalHeight * scale;
+        const offsetX = (gridSize - drawnWidth) / 2;
+        const offsetY = (gridSize - drawnHeight) / 2;
+
+        sampleContext.drawImage(
+            image,
+            offsetX,
+            offsetY,
+            drawnWidth,
+            drawnHeight
+        );
+
+        const pixels = sampleContext.getImageData(0, 0, gridSize, gridSize).data;
+        context.imageSmoothingEnabled = false;
+
+        for (let row = 0; row < gridSize; row++) {
+            for (let column = 0; column < gridSize; column++) {
+                const pixelIndex = (row * gridSize + column) * 4;
+                const luminance =
+                    pixels[pixelIndex] * 0.299 +
+                    pixels[pixelIndex + 1] * 0.587 +
+                    pixels[pixelIndex + 2] * 0.114;
+                const shade = Math.round(24 + (luminance / 255) * 142);
+                const x = column * cellWidth + gap / 2;
+                const y = row * cellHeight + gap / 2;
+
+                context.fillStyle = `rgb(${shade} ${shade} ${shade})`;
+                context.fillRect(
+                    x,
+                    y,
+                    Math.max(0, cellWidth - gap),
+                    Math.max(0, cellHeight - gap)
+                );
+            }
+        }
+
+        effect.classList.add('is-ready');
+    }
+
+    function scheduleRender() {
+        window.cancelAnimationFrame(resizeFrame);
+        resizeFrame = window.requestAnimationFrame(renderPixelPortrait);
+    }
+
+    function setMonochrome(monochrome) {
+        effect.classList.toggle('is-monochrome', monochrome);
+        effect.setAttribute('aria-pressed', String(monochrome));
+        effect.setAttribute(
+            'aria-label',
+            monochrome ? 'Show colored headshot' : 'Convert headshot to black and white'
+        );
+    }
+
+    if (image.complete) {
+        renderPixelPortrait();
+    } else {
+        image.addEventListener('load', renderPixelPortrait, { once: true });
+    }
+
+    if ('ResizeObserver' in window) {
+        new ResizeObserver(scheduleRender).observe(effect);
+    } else {
+        window.addEventListener('resize', scheduleRender);
+    }
+
+    effect.addEventListener('click', () => {
+        setMonochrome(true);
+    });
+
+    effect.addEventListener('pointerleave', () => setMonochrome(false));
+    effect.addEventListener('blur', () => setMonochrome(false));
+
+    effect.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            setMonochrome(true);
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', setupPixelatedHeadshot);
+
+// ==========================================
 // PARALLAX EFFECT (Optional - subtle)
 // ==========================================
 window.addEventListener('scroll', () => {

@@ -68,8 +68,18 @@
             </div>
         </div>
         <div class="hero-image">
-            <!-- <img src="rushin.jpeg" alt="Rushin Bhatt" class="headshot"> -->
-            <img src="headshot.PNG" alt="Rushin Bhatt" class="headshot">
+            <div
+                class="headshot-effect"
+                data-headshot-effect
+                tabindex="0"
+                role="button"
+                aria-label="Reveal original headshot"
+                aria-pressed="false"
+            >
+                <!-- <img src="rushin.jpeg" alt="Rushin Bhatt" class="headshot"> -->
+                <img src="headshot.PNG" alt="Portrait of Rushin Bhatt" class="headshot">
+                <canvas class="headshot-pixels" aria-hidden="true"></canvas>
+            </div>
         </div>
         <div class="scroll-indicator">
             <span></span>
